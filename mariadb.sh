@@ -1,24 +1,23 @@
 #!/bin/bash
 
-# Switch to root user
-sudo -i
 
 # Update package list and install EPEL release
 echo "Installing EPEL release..."
-yum install epel-release -y
+sudo yum install epel-release -y
 
 # Install MariaDB and Git
 echo "Installing MariaDB and Git..."
-yum install git mariadb-server -y
+sudo yum install git mariadb-server -y
 
 # Start and enable MariaDB service
 echo "Starting and enabling MariaDB service..."
-systemctl start mariadb
-systemctl enable mariadb
+sudo systemctl start mariadb
+sudo systemctl enable mariadb
 
 # Run mysql_secure_installation script automatically
 echo "Securing MariaDB..."
-expect <<EOF
+sudo yum install expect -y
+sudo expect <<EOF
 spawn mysql_secure_installation
 expect "Enter current password for root (enter for none):"
 send "\r"
@@ -41,7 +40,7 @@ EOF
 
 # Configure MariaDB: Create database and user
 echo "Configuring MariaDB database and user..."
-mysql -u root -padmin123 <<MYSQL_SCRIPT
+sudo mysql -u root -padmin123 <<MYSQL_SCRIPT
 CREATE DATABASE accounts;
 GRANT ALL PRIVILEGES ON accounts.* TO 'admin'@'%' IDENTIFIED BY 'admin123';
 FLUSH PRIVILEGES;
@@ -49,10 +48,10 @@ MYSQL_SCRIPT
 
 # Download source code and initialize database
 echo "Cloning source code and initializing database..."
-git clone -b main https://github.com/hkhcoder/vprofile-project.git
+sudo git clone -b main https://github.com/hkhcoder/vprofile-project.git
 cd vprofile-project
-mysql -u root -padmin123 accounts < src/main/resources/db_backup.sql
+sudo mysql -u root -padmin123 accounts < src/main/resources/db_backup.sql
 
 # Restart MariaDB service
 echo "Restarting MariaDB service..."
-systemctl restart mariadb
+sudo systemctl restart mariadb
